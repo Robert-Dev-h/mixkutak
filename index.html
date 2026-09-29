@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MixKutak — pokloni s pričom</title>
+  <style>
+    .order-panel {
+  width: min(560px, 100%);
+  height: 100%;
+  margin-left: auto;
+  padding: 25px;
+  overflow-y: auto;
+  background: #fbfaf7;
+}
+.order-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 22px;
+}
+.order-form label {
+  display: grid;
+  gap: 7px;
+  color: #514e46;
+  font-size: 14px;
+}
+.order-form input,
+.order-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d8d3c8;
+  background: white;
+  font: inherit;
+}
+.order-form textarea {
+  min-height: 85px;
+  resize: vertical;
+}
+.order-summary {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f0ede6;
+  line-height: 1.7;
+}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: #292820;
+      background: #fbfaf7;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      min-height: 76px;
+      padding: 12px 7%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      background: #fbfaf7;
+      border-bottom: 1px solid #eae7df;
+    }
+    .logo { font: bold 25px Georgia, serif; }
+    nav { display: flex; gap: 25px; }
+    nav a { color: #514e46; text-decoration: none; font-size: 14px; }
+    button { font: inherit; cursor: pointer; }
+    .cart-button {
+      padding: 11px 17px;
+      color: #292820;
+      background: transparent;
+      border: 1px solid #d8d3c8;
+      border-radius: 30px;
+    }
+    .hero {
+      min-height: 420px;
+      padding: 70px 10%;
+      display: flex;
+      align-items: center;
+      background: #eee9df;
+    }
+    .hero-copy { max-width: 540px; }
+    .eyebrow {
+      color: #82765f;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+    h1 { font: 52px/1.12 Georgia, serif; margin: 18px 0; }
+    .hero p { color: #625e55; line-height: 1.8; max-width: 430px; }
+    .button {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 15px 23px;
+      color: white;
+      background: #34372e;
+      border: 0;
+      border-radius: 3px;
+      text-decoration: none;
+    }
+    section { padding: 65px 8%; }
+    .section-title { text-align: center; margin-bottom: 32px; }
+    h2 { font: 34px Georgia, serif; margin: 0 0 10px; }
+    .section-title p, .category-description { color: #777268; }
+    .category-section { padding-top: 35px; }
+    .category-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .category-heading h2 { font-size: 30px; }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+    }
+    .product {
+      cursor: pointer;
+    }
+    .product img {
+      display: block;
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      background: #eee9df;
+    }
+    .product h3 { font: 20px Georgia, serif; margin: 13px 0 6px; }
+    .product p { color: #777268; margin: 0; }
+    .product .product-price { margin-top: 8px; color: #292820; }
+    .product .product-description {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .product button {
+      margin-top: 13px;
+      padding: 10px 14px;
+      color: #34372e;
+      background: transparent;
+      border: 1px solid #b8b1a4;
+    }
+    .product button:hover { background: #34372e; color: white; }
+    .add-section { background: #f0ede6; }
+    .add-form {
+      max-width: 720px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .add-form label { display: grid; gap: 7px; color: #514e46; font-size: 14px; }
+    .add-form input, .add-form select, .add-form textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d8d3c8;
+      background: white;
+      font: inherit;
+    }
+    .add-form textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .add-form .wide { grid-column: 1 / -1; }
+    .add-form button { justify-self: start; }
+    .hint { max-width: 720px; margin: 18px auto 0; color: #777268; font-size: 13px; line-height: 1.6; }
+    footer { padding: 28px 8%; background: #34372e; color: white; text-align: center; }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      background: rgb(0 0 0 / 45%);
+    }
+    .overlay.open { display: block; }
+    .cart-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: min(440px, 100%);
+      height: 100%;
+      padding: 25px;
+      overflow-y: auto;
+      background: #fbfaf7;
+    }
+    .cart-top { display: flex; justify-content: space-between; align-items: center; }
+    .cart-top h2 { font-size: 28px; }
+    .close-button { padding: 7px 11px; border: 1px solid #d8d3c8; background: transparent; }
+    .cart-item {
+      display: grid;
+      grid-template-columns: 70px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid #eae7df;
+    }
+    .cart-item img { width: 70px; height: 70px; object-fit: cover; }
+    .cart-item h3 { margin: 0 0 6px; font: 17px Georgia, serif; }
+    .cart-item p { margin: 0; color: #777268; font-size: 14px; }
+    .quantity-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .quantity-controls button { width: 25px; height: 25px; background: white; border: 1px solid #d8d3c8; }
+    .remove-button { border: 0; background: transparent; color: #777268; text-decoration: underline; font-size: 12px; }
+    .cart-total { display: flex; justify-content: space-between; margin: 22px 0; font-weight: bold; }
+    .checkout-button { width: 100%; }
+    .empty-cart { color: #777268; line-height: 1.6; padding: 20px 0; }
+    .detail-panel {
+      width: min(560px, 100%);
+      height: 100%;
+      margin-left: auto;
+      padding: 25px;
+      overflow-y: auto;
+      background: #fbfaf7;
+    }
+    .detail-panel img {
+      display: block;
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      background: #eee9df;
+      margin: 18px 0;
+    }
+    .detail-panel .eyebrow { margin-bottom: 8px; }
+    .detail-panel h2 { font-size: 28px; }
+    .detail-panel h3 { font: 26px Georgia, serif; margin: 0 0 8px; }
+    .detail-panel .product-price { margin: 12px 0; font-weight: bold; }
+    .detail-panel .product-description { color: #625e55; line-height: 1.7; }
+    .order-panel {
+  width: min(560px, 100%);
+  height: 100%;
+  margin-left: auto;
+  padding: 25px;
+  overflow-y: auto;
+  background: #fbfaf7;
+}
+.order-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 22px;
+}
+.order-form label {
+  display: grid;
+  gap: 7px;
+  color: #514e46;
+  font-size: 14px;
+}
+.order-form input,
+.order-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d8d3c8;
+  background: white;
+  font: inherit;
+}
+.order-form textarea {
+  min-height: 85px;
+  resize: vertical;
+}
+.order-summary {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f0ede6;
+  line-height: 1.7;
+}
+    @media (max-width: 700px) {
+      header { padding: 12px 5%; flex-wrap: wrap; }
+      nav { gap: 13px; order: 3; width: 100%; }
+      nav a { font-size: 12px; }
+      .hero { padding: 60px 7%; }
+      h1 { font-size: 40px; }
+      section { padding: 50px 6%; }
+      .products { grid-template-columns: 1fr; }
+      .add-form { grid-template-columns: 1fr; }
+      .add-form .wide { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">MixKutak</div>
+    <nav>
+      <a href="#pokloni">Pokloni</a>
+      <a href="#hobiji">Hobiji</a>
+      <a href="#sezonski">Sezonski izbor</a>
+      <a href="#dodaj">Dodaj proizvod</a>
+    </nav>
+    <button class="cart-button" id="open-cart">Košarica: <span id="cart-count">0</span></button>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Mali pokloni, velike priče</div>
+        <h1>Pronađi nešto posebno.</h1>
+        <p>Pažljivo odabrani pokloni, kreativni hobiji i sitnice koje običan dan čine ljepšim.</p>
+        <a class="button" href="#pokloni">Istraži ponudu</a>
+      </div>
+    </div>
+
+    <section class="category-section" id="pokloni">
+      <div class="category-heading">
+        <div>
+          <h2>Pokloni</h2>
+          <div class="category-description">Ideje za rođendane i posebne trenutke.</div>
+        </div>
+      </div>
+      <div class="products" id="products-pokloni"></div>
+    </section>
+
+    <section class="category-section" id="hobiji">
+      <div class="category-heading">
+        <div>
+          <h2>Za kreativce</h2>
+          <div class="category-description">Sitnice za stvaranje i opuštanje.</div>
+        </div>
+      </div>
+      <div class="products" id="products-hobiji"></div>
+    </section>
+
+    <section class="category-section" id="sezonski">
+      <div class="category-heading">
+        <div>
+          <h2>Sezonski izbor</h2>
+          <div class="category-description">Ponuda koja se mijenja kroz godinu.</div>
+        </div>
+      </div>
+      <div class="products" id="products-sezonski"></div>
+    </section>
+
+    <section class="add-section" id="dodaj">
+      <div class="section-title">
+        <h2>Dodaj proizvod u ponudu</h2>
+        <p>Ispuni podatke i novi proizvod pojavit će se u odabranoj kategoriji.</p>
+      </div>
+      <form class="add-form" id="product-form">
+        <label>
+          Naziv proizvoda
+          <input name="name" required placeholder="Npr. Poklon set za opuštanje">
+        </label>
+        <label>
+          Cijena u eurima
+          <input name="price" type="number" min="0.01" step="0.01" required placeholder="24.90">
+        </label>
+        <label>
+          Kategorija
+          <select name="category" required>
+            <option value="pokloni">Pokloni</option>
+            <option value="hobiji">Za kreativce</option>
+            <option value="sezonski">Sezonski izbor</option>
+          </select>
+        </label>
+        <label>
+          Poveznica na fotografiju (nije obavezno)
+          <input name="image" type="url" placeholder="https://...">
+        </label>
+        <label class="wide">
+          Kratki opis (što kupac dobiva, nije obavezno)
+          <textarea name="description" placeholder="Ogledni opis proizvoda"></textarea>
+        </label>
+        <button class="button wide" type="submit">Dodaj proizvod</button>
+      </form>
+      <details>
+        <summary>Pregled probnih narudžbi</summary>
+        <div id="orders-list">Još nema narudžbi.</div>
+      </details>
+      <p class="hint">Za probu se proizvodi spremaju samo u pregledniku na ovom računalu. Kasnije ćemo dodati sigurnu administratorsku stranicu i bazu podataka.</p>
+    </section>
+  </main>
+
+  <footer>MixKutak trgovina · Pokloni s pričom</footer>
+
+  <div class="overlay" id="product-overlay">
+    <aside class="detail-panel" aria-label="Detalji proizvoda">
+      <div class="cart-top">
+        <h2>Detalji proizvoda</h2>
+        <button class="close-button" id="close-product" type="button">Zatvori</button>
+      </div>
+      <div id="product-detail"></div>
+    </aside>
+  </div>
+  <div class="overlay" id="cart-overlay">
+    <aside class="cart-panel" aria-label="Košarica">
+      <div class="cart-top">
+        <h2>Tvoja košarica</h2>
+        <button class="close-button" id="close-cart">Zatvori</button>
+      </div>
+      <div id="cart-items"></div>
+      <div class="cart-total">
+        <span>Ukupno</span>
+        <span id="cart-total">0,00 €</span>
+      </div>
+      <button class="button checkout-button" id="checkout">Nastavi na narudžbu</button>
+    </aside>
+  </div>
+  <div class="overlay" id="order-overlay">
+    <section class="order-panel">
+      <div class="cart-top">
+        <h2>Podaci za narudžbu</h2>
+        <button class="close-button" id="close-order" type="button">Zatvori</button>
+      </div>
+  
+      <div class="order-summary" id="order-summary"></div>
+  
+      <form class="order-form" id="order-form">
+        <label>
+          Ime i prezime
+          <input name="name" required autocomplete="name">
+        </label>
+        <label>
+          E-mail
+          <input name="email" type="email" required autocomplete="email">
+        </label>
+        <label>
+          Telefon
+          <input name="phone" type="tel" required autocomplete="tel">
+        </label>
+        <label>
+          Adresa za dostavu
+          <textarea name="address" required autocomplete="street-address"></textarea>
+        </label>
+        <button class="button checkout-button" type="submit">Pošalji probnu narudžbu</button>
+      </form>
+    </section>
+  </div>
+  <script>
+    const fallbackImage = "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=700&q=80";
+    const categoryLabels = {
+      pokloni: "Pokloni",
+      hobiji: "Za kreativce",
+      sezonski: "Sezonski izbor"
+    };
+    const emptyDescription = "Ogledni proizvod — kratki opis još nije unesen.";
+    const defaultProducts = [
+      { id: "p1", name: "Poklon set za opuštanje", price: 24.90, category: "pokloni", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=700&q=80", description: "Ogledni primjer poklona. Kratki opis što kupac dobiva može se kasnije dopuniti." },
+      { id: "p2", name: "Mali znak pažnje", price: 18.00, category: "pokloni", image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=700&q=80", description: "Ogledni primjer malog poklona. Točan sadržaj još nije potvrđen." },
+      { id: "p3", name: "Mirisna svijeća", price: 14.50, category: "pokloni", image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=700&q=80", description: "Ogledni primjer svijeće za prikaz u trgovini." },
+      { id: "h1", name: "Bilježnica za ideje", price: 12.50, category: "hobiji", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=700&q=80", description: "Ogledni primjer bilježnice za kreativce." },
+      { id: "h2", name: "Kreativni set za crtanje", price: 19.90, category: "hobiji", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=700&q=80", description: "Ogledni primjer seta za crtanje. Sadržaj pakiranja još nije unesen." },
+      { id: "h3", name: "Set za pisanje", price: 16.00, category: "hobiji", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=700&q=80", description: "Ogledni primjer seta za pisanje." },
+      { id: "s1", name: "Proljetni buket", price: 22.00, category: "sezonski", image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=700&q=80", description: "Ogledni sezonski proizvod: primjer proljetnog buketa, ne potvrđena ponuda." },
+      { id: "s2", name: "Ljetni poklon paket", price: 28.00, category: "sezonski", image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=700&q=80", description: "Ogledni sezonski proizvod: primjer ljetnog paketa, sadržaj još nije unesen." },
+      { id: "s3", name: "Blagdanski ukras", price: 9.90, category: "sezonski", image: "https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=700&q=80", description: "Ogledni sezonski proizvod: primjer blagdanskog ukrasa." }
+    ];
+
+    function loadData(key, fallback) {
+      try {
+        const saved = localStorage.getItem(key);
+        return saved ? JSON.parse(saved) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    let products = loadData("mixkutak-products", defaultProducts);
+    let cart = loadData("mixkutak-cart", {});
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+
+    function money(value) {
+      return Number(value).toLocaleString("hr-HR", { style: "currency", currency: "EUR" });
+    }
+
+    function productImage(product) {
+      return product.image || fallbackImage;
+    }
+
+    function productDescription(product) {
+      const text = product.description && String(product.description).trim();
+      return text || emptyDescription;
+    }
+
+    function renderProducts() {
+      ["pokloni", "hobiji", "sezonski"].forEach(category => {
+        const container = document.getElementById("products-" + category);
+        const categoryProducts = products.filter(product => product.category === category);
+
+        if (categoryProducts.length === 0) {
+          container.innerHTML = "<p>Još nema proizvoda u ovoj kategoriji.</p>";
+          return;
+        }
+
+        container.innerHTML = categoryProducts.map(product => `
+          <article class="product" data-open="${escapeHTML(product.id)}">
+            <img src="${escapeHTML(productImage(product))}" alt="${escapeHTML(product.name)}">
+            <h3>${escapeHTML(product.name)}</h3>
+            <p class="product-description">${escapeHTML(productDescription(product))}</p>
+            <p class="product-price">${money(product.price)}</p>
+            <button type="button" data-add="${escapeHTML(product.id)}">Dodaj u košaricu</button>
+          </article>
+        `).join("");
+      });
+
+      document.querySelectorAll("[data-add]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          addToCart(button.dataset.add);
+        });
+      });
+
+      document.querySelectorAll("[data-open]").forEach(card => {
+        card.addEventListener("click", () => openProductDetail(card.dataset.open));
+      });
+    }
+    function renderOrders() {
+  const orders = loadData("mixkutak-orders", []);
+  const container = document.getElementById("orders-list");
+
+  if (!container) return;
+
+  if (orders.length === 0) {
+    container.textContent = "Još nema narudžbi.";
+    return;
+  }
+
+  container.innerHTML = orders.map(order => `
+    <article>
+      <h3>Narudžba ${escapeHTML(order.number)}</h3>
+      <p>${escapeHTML(order.createdAt)}</p>
+      <p>${escapeHTML(order.customer.name)} · ${escapeHTML(order.customer.email)} · ${escapeHTML(order.customer.phone)}</p>
+      <p>Adresa: ${escapeHTML(order.customer.address)}</p>
+      <p>${order.items.map(item => `${escapeHTML(item.name)} × ${item.quantity}`).join("<br>")}</p>
+      <strong>Ukupno: ${money(order.total)}</strong>
+      <hr>
+    </article>
+  `).join("");
+}
+    function addToCart(id) {
+      cart[id] = (cart[id] || 0) + 1;
+      saveCart();
+      renderCart();
+    }
+
+    function openProductDetail(id) {
+      const product = products.find(item => item.id === id);
+      if (!product) return;
+
+      const categoryName = categoryLabels[product.category] || product.category;
+      document.getElementById("product-detail").innerHTML = `
+        <div class="eyebrow">${escapeHTML(categoryName)}</div>
+        <h3>${escapeHTML(product.name)}</h3>
+        <img src="${escapeHTML(productImage(product))}" alt="${escapeHTML(product.name)}">
+        <p class="product-price">${money(product.price)}</p>
+        <p class="product-description">${escapeHTML(productDescription(product))}</p>
+        <button class="button" type="button" data-detail-add="${escapeHTML(product.id)}">Dodaj u košaricu</button>
+      `;
+
+      document.querySelector("[data-detail-add]").addEventListener("click", () => {
+        addToCart(product.id);
+      });
+
+      document.getElementById("product-overlay").classList.add("open");
+    }
+
+    function saveCart() {
+      localStorage.setItem("mixkutak-cart", JSON.stringify(cart));
+    }
+
+    function renderCart() {
+      const items = Object.entries(cart)
+        .map(([id, quantity]) => {
+          const product = products.find(item => item.id === id);
+          return product ? { product, quantity } : null;
+        })
+        .filter(Boolean);
+
+      const count = items.reduce((sum, item) => sum + item.quantity, 0);
+      const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+      document.getElementById("cart-count").textContent = count;
+      document.getElementById("cart-total").textContent = money(total);
+
+      const container = document.getElementById("cart-items");
+      if (items.length === 0) {
+        container.innerHTML = '<p class="empty-cart">Košarica je prazna. Dodaj neki proizvod iz ponude.</p>';
+        return;
+      }
+
+      container.innerHTML = items.map(({ product, quantity }) => `
+        <div class="cart-item">
+          <img src="${escapeHTML(productImage(product))}" alt="">
+          <div>
+            <h3>${escapeHTML(product.name)}</h3>
+            <p>${money(product.price)} po komadu</p>
+            <div class="quantity-controls">
+              <button type="button" data-minus="${escapeHTML(product.id)}">−</button>
+              <span>${quantity}</span>
+              <button type="button" data-plus="${escapeHTML(product.id)}">+</button>
+            </div>
+          </div>
+          <button class="remove-button" type="button" data-remove="${escapeHTML(product.id)}">Ukloni</button>
+        </div>
+      `).join("");
+
+      container.querySelectorAll("[data-minus]").forEach(button => {
+        button.addEventListener("click", () => changeQuantity(button.dataset.minus, -1));
+      });
+      container.querySelectorAll("[data-plus]").forEach(button => {
+        button.addEventListener("click", () => changeQuantity(button.dataset.plus, 1));
+      });
+      container.querySelectorAll("[data-remove]").forEach(button => {
+        button.addEventListener("click", () => {
+          delete cart[button.dataset.remove];
+          saveCart();
+          renderCart();
+        });
+      });
+    }
+
+    function changeQuantity(id, change) {
+      cart[id] = (cart[id] || 0) + change;
+      if (cart[id] <= 0) delete cart[id];
+      saveCart();
+      renderCart();
+    }
+
+    document.getElementById("product-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const form = new FormData(event.currentTarget);
+      const name = form.get("name").trim();
+      const price = Number(form.get("price"));
+      const image = form.get("image").trim();
+
+      products.push({
+        id: "custom-" + Date.now(),
+        name,
+        price,
+        category: form.get("category"),
+        image: image || fallbackImage,
+        description: String(form.get("description") || "").trim()
+      });
+
+      localStorage.setItem("mixkutak-products", JSON.stringify(products));
+      event.currentTarget.reset();
+      renderProducts();
+      alert("Proizvod je dodan u ponudu.");
+    });
+
+    const overlay = document.getElementById("cart-overlay");
+    const productOverlay = document.getElementById("product-overlay");
+    document.getElementById("close-product").addEventListener("click", () => productOverlay.classList.remove("open"));
+    productOverlay.addEventListener("click", event => {
+      if (event.target === productOverlay) productOverlay.classList.remove("open");
+    });
+    document.getElementById("open-cart").addEventListener("click", () => overlay.classList.add("open"));
+    document.getElementById("close-cart").addEventListener("click", () => overlay.classList.remove("open"));
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) overlay.classList.remove("open");
+    });
+    const orderOverlay = document.getElementById("order-overlay");
+
+document.getElementById("checkout").addEventListener("click", () => {
+  if (Object.keys(cart).length === 0) {
+    alert("Košarica je prazna.");
+    return;
+  }
+
+  const summary = Object.entries(cart).map(([id, quantity]) => {
+    const product = products.find(item => item.id === id);
+    return product
+      ? `${escapeHTML(product.name)} × ${quantity} — ${money(product.price * quantity)}`
+      : "";
+  }).filter(Boolean);
+
+  const total = Object.entries(cart).reduce((sum, [id, quantity]) => {
+    const product = products.find(item => item.id === id);
+    return sum + (product ? product.price * quantity : 0);
+  }, 0);
+
+  document.getElementById("order-summary").innerHTML =
+    `<strong>Pregled narudžbe</strong><br>${summary.join("<br>")}<hr>Ukupno: <strong>${money(total)}</strong>`;
+
+  document.getElementById("cart-overlay").classList.remove("open");
+  orderOverlay.classList.add("open");
+});
+
+document.getElementById("close-order").addEventListener("click", () => {
+  orderOverlay.classList.remove("open");
+});
+
+orderOverlay.addEventListener("click", event => {
+  if (event.target === orderOverlay) orderOverlay.classList.remove("open");
+});
+document.getElementById("order-form").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const customer = Object.fromEntries(new FormData(event.currentTarget));
+  const items = Object.entries(cart).map(([id, quantity]) => {
+    const product = products.find(item => item.id === id);
+    return product ? {
+      name: product.name,
+      price: product.price,
+      quantity
+    } : null;
+  }).filter(Boolean);
+
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const orders = loadData("mixkutak-orders", []);
+  const order = {
+    number: Date.now(),
+    createdAt: new Date().toLocaleString("hr-HR"),
+    customer,
+    items,
+    total
+  };
+
+  orders.unshift(order);
+  localStorage.setItem("mixkutak-orders", JSON.stringify(orders));
+  renderOrders();
+
+  alert(`Hvala, ${customer.name}! Probna narudžba je spremljena. Ukupno: ${money(total)}. Ovo još nije stvarna narudžba.`);
+
+  cart = {};
+  saveCart();
+  renderCart();
+  event.currentTarget.reset();
+  orderOverlay.classList.remove("open");
+});
+renderOrders();
+    renderProducts();
+    renderCart();
+  </script>
+</body>
+</html>
